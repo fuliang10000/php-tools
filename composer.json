@@ -11,9 +11,13 @@
             "src/functions.php"
         ]
     },
+    "extra": {
+        "class": "Fuliang\\PhpTools"
+    },
     "authors": [
         {
-            "name": "LingZi"
+            "name": "LingZi",
+            "email": "idevjdgittyucidvdinoper007@gmail.com"
         }
     ],
     "minimum-stability": "dev",
