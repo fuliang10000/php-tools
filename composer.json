@@ -19,6 +19,6 @@
     "minimum-stability": "dev",
     "require": {
         "php": ">=7.4",
-        "ext-gd": "^2.3"
+        "ext-gd": "*"
     }
 }
