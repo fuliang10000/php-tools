@@ -1,0 +1,24 @@
+{
+    "name": "fuliang/php-tools",
+    "description": "php开发辅助类以及函数",
+    "type": "composer-plugin",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Fuliang\\PhpTools\\": "src/"
+        },
+        "files": [
+            "src/functions.php"
+        ]
+    },
+    "authors": [
+        {
+            "name": "LingZi"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.4",
+        "ext-gd": "^2.3"
+    }
+}
