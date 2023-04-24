@@ -22,10 +22,10 @@
             "src/functions.php"
         ]
     },
-    "repositories": {
-        "packagist": {
-            "type": "composer",
-            "url": "https://mirrors.aliyun.com/composer/"
-        }
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.x-dev"
+        },
+        "class": "Fuliang\\PhpTools\\Exceptions\\ToolsException"
     }
 }
