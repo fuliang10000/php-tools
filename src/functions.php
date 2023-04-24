@@ -1,9 +1,5 @@
 <?php
 
-use Fuliang\PhpTools\Exceptions\ToolsException;
-use Fuliang\PhpTools\Constants\ErrorCode;
-use Fuliang\PhpTools\Constants\ErrorMsg;
-
 
 /**
  * 得到微妙.

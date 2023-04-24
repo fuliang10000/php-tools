@@ -21,13 +21,11 @@
     "require": {
         "php": ">=7.4",
         "ext-gd": "*",
-        "ext-mbstring": "*",
-        "composer-plugin-api": "^2.0"
-    },
-    "require-dev": {
-        "composer/composer": "^2.0"
+        "ext-mbstring": "*"
     },
     "extra": {
-        "class": "Fuliang\\PhpTools"
+        "branch-alias": {
+            "dev-master": "1.x-dev"
+        }
     }
 }
