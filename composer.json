@@ -29,6 +29,11 @@
             "bin-links": true,
             "forward-command": false
         },
+        "tools": {
+            "helper": [
+                "Fuliang\\PhpTools\\Helper\\ArrayHelper"
+            ]
+        },
         "branch-alias": {
             "dev-master": "1.x-dev"
         }
