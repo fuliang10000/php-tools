@@ -75,4 +75,34 @@ class ArrayHelper
 
         return $returnArr;
     }
+
+    /**
+     * 数组分页函数.
+     *
+     * @param array $array 查询出来的所有数组
+     * @param int $page 当前第几页
+     * @param int $count 每页多少条数据
+     * @return array [需要的数据,总页数,总记录数]
+     *
+     */
+    function arrayPage(array $array, int $page = 1, int $count = 10): array
+    {
+        global $totalPage;
+
+        // 判断当前页面是否为空 如果为空就表示为第一页面
+        $page = (empty($page) || $page <= 1) ? 1 : $page;
+
+        // 计算每次分页的开始位置
+        $start = ($page - 1) * $count;
+
+        $total = count($array);
+
+        // 计算总页面数
+        $totalPage = ceil($total / $count);
+
+        // 拆分数据
+        $list = array_slice($array, $start, $count);
+
+        return [$list, $totalPage, $total];
+    }
 }

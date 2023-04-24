@@ -1,22 +1,9 @@
 <?php
 
-use Fuliang\PhpTools\Helper\ToolsException;
-use Fuliang\PhpTools\Helper\ErrorCode;
-use Fuliang\PhpTools\Helper\ErrorMsg;
-/**
- * 编码转换.
- *
- * @param $value
- *
- * @author fuliang
- */
-function str_iconv(&$value)
-{
-    if (!(is_numeric($value) || is_float($value))) {
-        $value = (string)"\t" . $value;
-        mb_convert_encoding($value, 'GBK');
-    }
-}
+use Fuliang\PhpTools\Exceptions\ToolsException;
+use Fuliang\PhpTools\Constants\ErrorCode;
+use Fuliang\PhpTools\Constants\ErrorMsg;
+
 
 /**
  * 得到微妙.
@@ -313,47 +300,6 @@ function arrayColumnReindex($ary, $k = 0)
 }
 
 /**
- * 与客户端调试打印调试信息.
- *
- * @param $data
- * @param bool|false $op_file
- * @param mixed $filename
- */
-function debug($data, $op_file = true, $filename = 'debug')
-{
-    $data = is_array($data) ? var_export($data, true) : $data;
-    if ($op_file) {
-        file_put_contents(\Yii::$app->basePath . "/../logs/{$filename}.txt", date('Y/m/d H:i:s', time()) . " \t输出结果:" . $data . "\r\n\r\n", FILE_APPEND);
-    } else {
-        $data = ['error' => 100, 'msg' => $data];
-        // 返回JSON数据格式到客户端 包含状态信息
-        header('Content-Type:application/json; charset=utf-8');
-        exit(json_encode($data));
-    }
-}
-
-/**
- * 二维数据计算和.
- *
- * @param $arr
- * @param $key
- * @return int
- * @author fuliang
- *
- */
-function arrayMultiSum($arr, $key)
-{
-    $sum = 0;
-    if (is_array($arr)) {
-        foreach ($arr as $array) {
-            $sum += $array[$key];
-        }
-    }
-
-    return $sum;
-}
-
-/**
  * 下载远程文件.
  *
  * @param $url
@@ -443,9 +389,6 @@ function authCode($string, $operation = ENCODE, $key = AUTH_KEY, $expiry = 0)
 
     return $keyc . str_replace('=', '', base64_encode($result));
 }
-
-
-
 
 
 /**
@@ -609,192 +552,66 @@ function exportExcel($fileName, $arr_field, $arr_list, $array_keys, $k_time = 'c
 }
 
 /**
- * 用户fputcsv导出excel.
- *
- * @param string $fileName 文件名称
- * @param array $heads 头列表
- * @param array $data 数据
- *
- * @author fuliang
- */
-function exportCsv($fileName, $heads, $data)
-{
-    // 不限定时间
-    set_time_limit(0);
-    // 内存限定
-    ini_set('memory_limit', '1024M');
-    // 输出Excel文件头
-    header('Content-Type: application/vnd.ms-excel');
-    header("Content-Disposition: attachment;filename = {$fileName}" . '.csv');
-    header('Cache-Control: max-age=0');
-
-    // 打开PHP文件句柄，php://output 表示直接输出到浏览器
-    $fp = fopen('php://output', 'a');
-    fwrite($fp, chr(0xEF) . chr(0xBB) . chr(0xBF)); // 添加 BOM
-    // 输出Excel列名信息
-    array_walk($heads, 'str_iconv');
-    // 将数据通过fputcsv写到文件句柄
-    fputcsv($fp, $heads);
-
-    // 输出Excel内容
-    foreach ($data as $one) {
-        array_walk($one, 'str_iconv');
-        fputcsv($fp, $one);
-    }
-
-    fclose($fp);
-    exit;
-}
-
-/**
  * 数组转换成xml.
  *
- * @param $arr 数组
- *
+ * @param $array 数组
  * @return string xml结果
- * @author fuliang
- *
  */
-function arrayToXml($arr)
-{
-    $xml = '<xml>';
-    foreach ($arr as $key => $val) {
-        if (is_numeric($val)) {
-            $xml .= '<' . $key . '>' . $val . '</' . $key . '>';
-        } else {
-            $xml .= '<' . $key . '><![CDATA[' . $val . ']]></' . $key . '>';
+if (!function_exists('array_to_xml')) {
+    function array_to_xml(array $array): string
+    {
+        $xml = '<xml>';
+        foreach ($array as $key => $val) {
+            if (is_numeric($val)) {
+                $xml .= '<' . $key . '>' . $val . '</' . $key . '>';
+            } else {
+                $xml .= '<' . $key . '><![CDATA[' . $val . ']]></' . $key . '>';
+            }
         }
-    }
-    $xml .= '</xml>';
+        $xml .= '</xml>';
 
-    return $xml;
+        return $xml;
+    }
 }
 
 /**
  * 将xml转为数组.
  *
- * @param $xml xml数据
- *
- * @return array|mixed|stdClass
+ * @param string $xml xml数据
+ * @return array
  */
-function xmlToArray($xml)
-{
-    //将XML转为array
-    return json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
+if (!function_exists('xml_to_array')) {
+    function xml_to_array(string $xml): array
+    {
+        return json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
+    }
 }
 
-//获取汉字首字母
-function getfirstchar($s0)
-{
-    $fchar = ord($s0[0]);
-    if ($fchar >= ord('A') and $fchar <= ord('z')) {
-        return strtoupper($s0[0]);
-    }
-    $s1 = iconv('UTF-8', 'gb2312', $s0);
-    $s2 = iconv('gb2312', 'UTF-8', $s1);
-    if ($s2 == $s0) {
-        $s = $s1;
-    } else {
-        $s = $s0;
-    }
-    $asc = ord($s[0]) * 256 + ord($s[1]) - 65536;
-    if ($asc >= -20319 and $asc <= -20284) {
-        return 'A';
-    }
-    if ($asc >= -20283 and $asc <= -19776) {
-        return 'B';
-    }
-    if ($asc >= -19775 and $asc <= -19219) {
-        return 'C';
-    }
-    if ($asc >= -19218 and $asc <= -18711) {
-        return 'D';
-    }
-    if ($asc >= -18710 and $asc <= -18527) {
-        return 'E';
-    }
-    if ($asc >= -18526 and $asc <= -18240) {
-        return 'F';
-    }
-    if ($asc >= -18239 and $asc <= -17923) {
-        return 'G';
-    }
-    if ($asc >= -17922 and $asc <= -17418) {
-        return 'I';
-    }
-    if ($asc >= -17417 and $asc <= -16475) {
-        return 'J';
-    }
-    if ($asc >= -16474 and $asc <= -16213) {
-        return 'K';
-    }
-    if ($asc >= -16212 and $asc <= -15641) {
-        return 'L';
-    }
-    if ($asc >= -15640 and $asc <= -15166) {
-        return 'M';
-    }
-    if ($asc >= -15165 and $asc <= -14923) {
-        return 'N';
-    }
-    if ($asc >= -14922 and $asc <= -14915) {
-        return 'O';
-    }
-    if ($asc >= -14914 and $asc <= -14631) {
-        return 'P';
-    }
-    if ($asc >= -14630 and $asc <= -14150) {
-        return 'Q';
-    }
-    if ($asc >= -14149 and $asc <= -14091) {
-        return 'R';
-    }
-    if ($asc >= -14090 and $asc <= -13319) {
-        return 'S';
-    }
-    if ($asc >= -13318 and $asc <= -12839) {
-        return 'T';
-    }
-    if ($asc >= -12838 and $asc <= -12557) {
-        return 'W';
-    }
-    if ($asc >= -12556 and $asc <= -11848) {
-        return 'X';
-    }
-    if ($asc >= -11847 and $asc <= -11056) {
-        return 'Y';
-    }
-    if ($asc >= -11055 and $asc <= -10247) {
-        return 'Z';
-    }
-
-    return null;
-}
 
 /**
  * 获取天的问候语.
  *
  * @return string
- * @author fuliang
- *
  */
-function getDayReeting()
-{
-    // 以上海时区为标准
-    date_default_timezone_set('Asia/Shanghai');
+if (!function_exists('get_day_reeting')) {
+    function get_day_reeting(): string
+    {
+        // 以上海时区为标准
+        date_default_timezone_set('Asia/Shanghai');
 
-    $rst = '晚上好';
-    $h = date('H');
+        $rst = '晚上好';
+        $h = date('H');
 
-    if ($h < 11) {
-        $rst = '早上好';
-    } elseif ($h < 13) {
-        $rst = '中午好';
-    } elseif ($h < 17) {
-        $rst = '下午好';
+        if ($h < 11) {
+            $rst = '早上好';
+        } elseif ($h < 13) {
+            $rst = '中午好';
+        } elseif ($h < 17) {
+            $rst = '下午好';
+        }
+
+        return $rst;
     }
-
-    return $rst;
 }
 
 /**
@@ -1523,84 +1340,29 @@ function friendly_date($sTime, $type = 'normal', $alt = 'false')
 
 /**
  * 时间差值
- * @param $begin_time
- * @param $end_time
+ * @param int $begin_time
+ * @param int $end_time
  * @return string
  */
-function getTimeDiff($begin_time, $end_time)
-{
-    if ($begin_time < $end_time) {
-        $starttime = $begin_time;
-        $endtime = $end_time;
-    } else {
-        $starttime = $end_time;
-        $endtime = $begin_time;
+if (!function_exists('get_time_diff')) {
+    function get_time_diff(int $begin_time, int $end_time): string
+    {
+        if ($begin_time < $end_time) {
+            $startTime = $begin_time;
+            $endTime = $end_time;
+        } else {
+            $startTime = $end_time;
+            $endTime = $begin_time;
+        }
+        $timeDiff = $endTime - $startTime;
+        $days = intval($timeDiff / 86400);
+        $remain = $timeDiff % 86400;
+        $hours = intval($remain / 3600);
+        $remain = $remain % 3600;
+        $mins = intval($remain / 60);
+
+        return $days . '天' . $hours . '小时' . $mins . '分';
     }
-    $timediff = $endtime - $starttime;
-    $days = intval($timediff / 86400);
-    $remain = $timediff % 86400;
-    $hours = intval($remain / 3600);
-    $remain = $remain % 3600;
-    $mins = intval($remain / 60);
-    $secs = $remain % 60;
-
-    return $days . '天' . $hours . '小时' . $mins . '分';
-}
-
-/**
- * 获取游戏icon.
- *
- * @param $gameid 游戏id
- *
- * @return string
- */
-function getGameIcon($gameid)
-{
-    return \common\models\MoxGame::getLogo($gameid);
-}
-
-/**
- * 获取游戏icon. 老官网.
- *
- * @param $gameid 游戏id
- *
- * @return string
- */
-function getGameIconOld($gameid)
-{
-    return \common\models\MoxGame::getLogoOld($gameid);
-}
-
-/**
- * 数组分页函数.
- *
- * @param $array 查询出来的所有数组
- * @param int $page 当前第几页
- * @param int $count每页多少条数据
- * @param mixed $count
- * @return array [需要的数据,总页数,总记录数]
- * @author fuliang
- *
- */
-function arrayPage($array, $page = 1, $count = 10)
-{
-    global $totalPage;
-
-    // 判断当前页面是否为空 如果为空就表示为第一页面
-    $page = (empty($page) || $page <= 1) ? 1 : $page;
-
-    // 计算每次分页的开始位置
-    $start = ($page - 1) * $count;
-
-    $total = count($array);
-
-    // 计算总页面数
-    $totalPage = ceil($total / $count);
-
-    // 拆分数据
-    $list = array_slice($array, $start, $count);
-
-    return [$list, $totalPage, $total];
 }
 
 /**
@@ -1684,78 +1446,6 @@ function __stripcslashes($params)
     }
 
     return $_arr;
-}
-
-/**
- * 获取游戏详情地址.
- *
- * @param $gid
- * @return string
- */
-function getGameDetailUrl($gid)
-{
-    // 官网地址
-    $homeUrl = Yii::$app->params['MOX_HOME_URL'];
-
-    return $homeUrl . "game/detail/{$gid}.htm";
-}
-
-/**
- * 获取游戏资讯点击地址.
- *
- * @param $id 资讯id
- * @param $gid 游戏id
- * @param int $type 0:非下载 1:安卓下载 2: IOS下载
- *
- * @return string
- * @author fuliang
- *
- */
-function getGameInfoUrl($id, $gid, $type = 0)
-{
-    // 官网地址
-    $homeUrl = Yii::$app->params['MOX_API_URL'];
-
-//    if ($type) {
-    return $homeUrl . 'html/info-detail/detail.php?id=' . $id;
-//    } else {
-//        $url = getGameDetailUrl($gid);
-//    }
-}
-
-/**
- * 格式化搜索时间.
- *
- * @param bool|true $is_now
- * @return array     [开始时间,结束时间,相差的天数]
- * @author fuliang
- *
- */
-function getSearchDate($is_now = true)
-{
-    $sdate = \Yii::$app->request->get('start_time');
-    $edate = \Yii::$app->request->get('end_time');
-
-    // 昨天时间戳
-    $yestoday = date('Y-m-d', strtotime('-1 day'));
-    $stime = strtotime($yestoday . ' 00:00:00');
-    $etime = $is_now ? time() : strtotime($yestoday . ' 23:59:59');
-
-    if ($sdate && $edate) {
-        $stime = strtotime($sdate . ' 00:00:00');
-        $etime = strtotime($edate . ' 23:59:59');
-    } elseif ($sdate) {
-        $stime = strtotime($sdate . ' 00:00:00');
-        $etime = strtotime('+1 month', $stime);
-    } elseif ($edate) {
-        $etime = strtotime($edate . ' 23:59:59');
-        $stime = strtotime('-1 month', $stime);
-    }
-
-    // 相差的天数
-    $differ_day = ceil(($etime - $stime) / 86400);
-
-    return [$stime, $etime, $differ_day];
 }
 
 /**
