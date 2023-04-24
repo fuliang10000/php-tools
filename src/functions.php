@@ -1770,35 +1770,4 @@ function sig_func()
     pcntl_waitpid(-1, $status, WNOHANG);
 }
 
-/**
- * 根据总数和取模数，获取取模为0的数.
- *
- * @param int $total 总数
- * @param int $ceil 取模数 默认：5
- *
- * For example,
- *
- * ```php
- * $total = 20;
- * $ceil = 5;
- *
- * // the result is:
- * // [5, 10, 15, 20]
- * ```
- * @return array
- * @author fuliang
- * @date 2018-09-27
- */
-function get_make_num($total, $ceil = 5)
-{
-    $returnArr = [];
-    $i = 1;
-    while ($i <= $total) {
-        if (0 == $i % $ceil) {
-            array_push($returnArr, $i);
-        }
-        ++$i;
-    }
 
-    return $returnArr;
-}
