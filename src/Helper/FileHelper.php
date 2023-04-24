@@ -4,6 +4,10 @@
 namespace Fuliang\PhpTools\Helper;
 
 
+use Fuliang\PhpTools\Constants\ErrorCode;
+use Fuliang\PhpTools\Constants\ErrorMsg;
+use Fuliang\PhpTools\Exceptions\ToolsException;
+
 class FileHelper
 {
 

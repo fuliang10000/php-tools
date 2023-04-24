@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Fuliang\PhpTools\Helper;
+namespace Fuliang\PhpTools\Constants;
 
 
 class ErrorMsg

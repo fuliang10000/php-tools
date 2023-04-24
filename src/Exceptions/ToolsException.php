@@ -1,7 +1,8 @@
 <?php
 
-namespace Fuliang\PhpTools\Helper;
+namespace Fuliang\PhpTools\Exceptions;
 
+use Fuliang\PhpTools\Constants\ErrorCode;
 use Throwable;
 
 class ToolsException extends \Exception
