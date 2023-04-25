@@ -23,7 +23,8 @@
             "Fuliang\\PhpTools\\": "src/"
         },
         "files": [
-            "src/functions.php"
+            "src/functions.php",
+            "src/constants.php"
         ]
     },
     "minimum-stability": "dev",

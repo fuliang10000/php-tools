@@ -123,19 +123,19 @@ if (!function_exists('rand_code')) {
  * @return string
  */
 if (!function_exists('auth_code')) {
-    function auth_code(string $string, string $operation = 'ENCODE', string $key = '', int $expiry = 0)
+    function auth_code(string $string, string $operation = ENCODE, string $key = AUTH_KEY, int $expiry = 0)
     {
         $ckey_length = 0;
 
         $key = md5($key ? $key : '9e13yK8RN2M0lKP8CLRLhGs468d1WMaSlbDeCcI');
         $keya = md5(substr($key, 0, 16));
         $keyb = md5(substr($key, 16, 16));
-        $keyc = $ckey_length ? ('DECODE' == $operation ? substr($string, 0, $ckey_length) : substr(md5(microtime()), -$ckey_length)) : '';
+        $keyc = $ckey_length ? (DECODE == $operation ? substr($string, 0, $ckey_length) : substr(md5(microtime()), -$ckey_length)) : '';
 
         $cryptkey = $keya . md5($keya . $keyc);
         $key_length = strlen($cryptkey);
 
-        $string = 'DECODE' == $operation ? base64_decode(substr($string, $ckey_length)) : sprintf('%010d', $expiry ? $expiry + time() : 0) . substr(md5($string . $keyb), 0, 16) . $string;
+        $string = DECODE == $operation ? base64_decode(substr($string, $ckey_length)) : sprintf('%010d', $expiry ? $expiry + time() : 0) . substr(md5($string . $keyb), 0, 16) . $string;
         $string_length = strlen($string);
 
         $result = '';
@@ -162,7 +162,7 @@ if (!function_exists('auth_code')) {
             $result .= chr(ord($string[$i]) ^ ($box[($box[$a] + $box[$j]) % 256]));
         }
 
-        if ('DECODE' == $operation) {
+        if (DECODE == $operation) {
             if ((0 == substr($result, 0, 10) || substr($result, 0, 10) - time() > 0) && substr($result, 10, 16) == substr(md5(substr($result, 26) . $keyb), 0, 16)) {
                 return substr($result, 26);
             }
