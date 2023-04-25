@@ -2,8 +2,6 @@
 
 namespace Fuliang\PhpTools\Exceptions;
 
-use Composer\Composer;
-use Composer\IO\IOInterface;
 use Fuliang\PhpTools\Constants\ErrorCode;
 use Throwable;
 

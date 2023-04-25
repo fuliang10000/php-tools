@@ -132,4 +132,95 @@ class FileHelper
     {
         return ceil(filesize($filePath));
     }
+
+    /**
+     * 递归移动文件及文件夹.
+     *
+     * @param string $source 源目录或源文件
+     * @param string $target 目的目录或目的文件
+     * @return bool
+     */
+    public function moveFile(string $source, string $target): bool
+    {
+        if (!file_exists($source)) {
+            throw new ToolsException(ErrorCode::ERROR_400, ErrorMsg::FILE_NOT_EXIST);
+        }
+
+        // 如果要移动文件
+        if ('file' == filetype($source)) {
+            $basedir = dirname($target);
+            if (!is_dir($basedir)) {
+                mkdir($basedir, 0755, true);
+            } //目标目录不存在时给它创建目录
+            copy($source, $target);
+            unlink($source);
+        } else { // 如果要移动目录
+            if (!file_exists($target)) {
+                mkdir($target, 0755, true);
+            } //目标目录不存在时就创建
+
+            $files = []; //存放文件
+            $dirs = []; //存放目录
+            $fh = opendir($source);
+
+            if (false != $fh) {
+                while ($row = readdir($fh)) {
+                    $src_file = $source . '/' . $row; //每个源文件
+                    if ('.' != $row && '..' != $row) {
+                        if (!is_dir($src_file)) {
+                            $files[] = $row;
+                        } else {
+                            $dirs[] = $row;
+                        }
+                    }
+                }
+                closedir($fh);
+            }
+
+            foreach ($files as $v) {
+                copy($source . '/' . $v, $target . '/' . $v);
+                unlink($source . '/' . $v);
+            }
+
+            if (count($dirs)) {
+                foreach ($dirs as $v) {
+                    $this->moveFile($source . '/' . $v, $target . '/' . $v);
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * 删除指定文件夹.
+     * @param string $path
+     * @param bool $delDir
+     * @return bool
+     */
+    public function delDirAndFile(string $path, bool $delDir = false): bool
+    {
+        if ($delDir && !is_dir($path)) {
+            return true;
+        }
+
+        $handle = opendir($path);
+        if ($handle) {
+            while (false !== ($item = readdir($handle))) {
+                if ('.' != $item && '..' != $item) {
+                    is_dir("{$path}/{$item}") ? $this->delDirAndFile("{$path}/{$item}", $delDir) : unlink("{$path}/{$item}");
+                }
+            }
+            closedir($handle);
+            if ($delDir) {
+                return rmdir($path);
+            }
+        } else {
+            if (file_exists($path)) {
+                return unlink($path);
+            }
+
+            return false;
+        }
+    }
 }

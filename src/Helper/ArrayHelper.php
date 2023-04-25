@@ -62,7 +62,7 @@ class ArrayHelper
      * ```
      * @return array
      */
-    function getMakeNum(int $total, int $ceil = 5): array
+    public function getMakeNum(int $total, int $ceil = 5): array
     {
         $returnArr = [];
         $i = 1;
@@ -85,7 +85,7 @@ class ArrayHelper
      * @return array [需要的数据,总页数,总记录数]
      *
      */
-    function arrayPage(array $array, int $page = 1, int $count = 10): array
+    public function arrayPage(array $array, int $page = 1, int $count = 10): array
     {
         global $totalPage;
 
@@ -104,5 +104,27 @@ class ArrayHelper
         $list = array_slice($array, $start, $count);
 
         return [$list, $totalPage, $total];
+    }
+
+    /**
+     * 多位数组排序.
+     *
+     * @param array $arr
+     * @param string $key
+     * @param int $sort_order
+     * @param int $sort_type
+     *
+     * @return array
+     */
+    public function arrayMultiSort(array $arr, string $key, int $sort_order = SORT_DESC, int $sort_type = SORT_NUMERIC): array
+    {
+        foreach ($arr as $array) {
+            if (is_array($array)) {
+                $key_arrays[] = $array[$key];
+            }
+        }
+        array_multisort($key_arrays, $sort_order, $sort_type, $arr);
+
+        return $arr;
     }
 }
